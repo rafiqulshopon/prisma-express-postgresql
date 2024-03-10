@@ -54,19 +54,24 @@ export const createComment = async (req, res) => {
 };
 
 export const getComment = async (req, res) => {
-  const commentId = req.params.id;
-  const comment = await prisma.comment.findUnique({
-    where: { id: commentId },
-    include: {
-      user: true,
-      post: true,
-    },
-  });
+  try {
+    const commentId = req.params.id;
+    const comment = await prisma.comment.findUnique({
+      where: { id: commentId },
+      include: {
+        user: true,
+        post: true,
+      },
+    });
 
-  if (comment) {
-    return res.json({ status: 200, data: comment });
-  } else {
-    return res.status(404).json({ msg: 'Comment not found' });
+    if (comment) {
+      return res.json({ status: 200, data: comment });
+    } else {
+      return res.status(404).json({ msg: 'Comment not found' });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ error: 'Internal server error' });
   }
 };
 
