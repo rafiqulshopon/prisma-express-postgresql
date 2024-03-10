@@ -91,22 +91,28 @@ export const getPost = async (req, res) => {
       return res.status(404).json({ error: 'Post not found' });
     }
   } catch (error) {
+    console.error(error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
 
 export const createPost = async (req, res) => {
-  const { userId, title, description } = req.body;
+  try {
+    const { userId, title, description } = req.body;
 
-  const newPost = await prisma.post.create({
-    data: {
-      userId: Number(userId),
-      title,
-      description,
-    },
-  });
+    const newPost = await prisma.post.create({
+      data: {
+        userId: Number(userId),
+        title,
+        description,
+      },
+    });
 
-  return res.json({ status: 200, data: newPost, msg: 'Post created.' });
+    return res.json({ status: 200, data: newPost, msg: 'Post created.' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
 };
 
 export const updatePost = async (req, res) => {
@@ -119,17 +125,23 @@ export const updatePost = async (req, res) => {
     });
     return res.status(200).json(updatedPost);
   } catch (error) {
+    console.error(error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
 
 export const deletePost = async (req, res) => {
-  const postId = req.params.id;
-  await prisma.post.delete({
-    where: {
-      id: Number(postId),
-    },
-  });
+  try {
+    const postId = req.params.id;
+    await prisma.post.delete({
+      where: {
+        id: Number(postId),
+      },
+    });
 
-  return res.json({ status: 200, msg: 'Post deleted successfully' });
+    return res.json({ status: 200, msg: 'Post deleted successfully' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
 };
