@@ -1,29 +1,33 @@
 import prisma from '../config/db.js';
 
 export const getComments = async (req, res) => {
-  const comments = await prisma.comment.findMany({
-    include: {
-      user: {
-        select: {
-          id: true,
-          email: true,
-          name: true,
+  try {
+    const comments = await prisma.comment.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            name: true,
+          },
         },
-      },
-      post: {
-        include: {
-          user: {
-            select: {
-              id: true,
-              email: true,
-              name: true,
+        post: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                email: true,
+                name: true,
+              },
             },
           },
         },
       },
-    },
-  });
-  return res.json({ status: 200, data: comments });
+    });
+    return res.json({ status: 200, data: comments });
+  } catch (error) {
+    return res.status(500).json({ error: 'Internal server error' });
+  }
 };
 
 export const createComment = async (req, res) => {
