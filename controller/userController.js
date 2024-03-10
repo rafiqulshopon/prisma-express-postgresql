@@ -8,6 +8,9 @@ export const getUsers = async (req, res) => {
         name: true,
         email: true,
         createdAt: true,
+        _count: {
+          select: { post: true },
+        },
       },
     });
 
