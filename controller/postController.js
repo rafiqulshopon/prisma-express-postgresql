@@ -1,7 +1,14 @@
 import prisma from '../config/db.js';
 
 export const getPosts = async (req, res) => {
-  const { q } = req.query;
+  let { q, page, limit } = req.query;
+  page = parseInt(page) || 1;
+  limit = parseInt(limit) || 10;
+
+  if (page <= 0) page = 1;
+  if (limit <= 0 || limit > 100) limit = 10;
+
+  const skip = (page - 1) * limit;
 
   try {
     let queryOptions = {
@@ -22,6 +29,8 @@ export const getPosts = async (req, res) => {
       orderBy: {
         id: 'desc',
       },
+      skip,
+      take: limit,
     };
 
     if (q) {
@@ -44,7 +53,22 @@ export const getPosts = async (req, res) => {
     }
 
     const posts = await prisma.post.findMany(queryOptions);
-    return res.status(200).json(posts);
+
+    const totalPosts = await prisma.post.count({
+      where: queryOptions.where,
+    });
+
+    const totalPages = Math.ceil(totalPosts / limit);
+
+    return res.status(200).json({
+      data: posts,
+      meta: {
+        totalPages,
+        currentPage: page,
+        limit: limit,
+        totalPosts,
+      },
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ error: 'Internal server error' });
