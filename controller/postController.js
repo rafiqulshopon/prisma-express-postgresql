@@ -1,8 +1,10 @@
 import prisma from '../config/db.js';
 
 export const getPosts = async (req, res) => {
+  const { q } = req.query;
+
   try {
-    const posts = await prisma.post.findMany({
+    let queryOptions = {
       include: {
         comment: {
           select: {
@@ -17,9 +19,34 @@ export const getPosts = async (req, res) => {
           },
         },
       },
-    });
+      orderBy: {
+        id: 'desc',
+      },
+    };
+
+    if (q) {
+      queryOptions.where = {
+        OR: [
+          {
+            title: {
+              contains: q,
+              mode: 'insensitive',
+            },
+          },
+          {
+            description: {
+              contains: q,
+              mode: 'insensitive',
+            },
+          },
+        ],
+      };
+    }
+
+    const posts = await prisma.post.findMany(queryOptions);
     return res.status(200).json(posts);
   } catch (error) {
+    console.error(error);
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
